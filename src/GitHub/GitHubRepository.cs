@@ -4,7 +4,7 @@ using RepoStats.Domain;
 
 namespace RepoStats.GitHubLoader;
 
-public class GitHubRepository(IGitHubClient client, IDisposable lifetimeReference) : ISourceCodeRepository
+internal class GitHubRepository(IGitHubClient client, IDisposable lifetimeReference) : ISourceCodeRepository
 {
     private bool _disposedValue;
 

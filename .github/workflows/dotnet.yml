@@ -27,4 +27,6 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
+      env:
+        SecurityKey: ${{ secrets.SECURITYKEY }}
       run: dotnet test --no-build --verbosity normal

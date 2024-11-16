@@ -11,6 +11,7 @@ namespace IntegrationTests
         public GitHubFixture()
         {
             IConfiguration configuration = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
                 .AddUserSecrets<GitHubFixture>()
                 .Build();
 
