@@ -12,10 +12,14 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["App/App.csproj", "App/"]
-RUN dotnet restore "./App/App.csproj"
+COPY ["apps/App/App.csproj", "apps/App/"]
+COPY ["src/Application/Application.csproj", "src/Application/"]
+COPY ["src/Domain/Domain.csproj", "src/Domain/"]
+COPY ["src/GitHub/GitHubLoader.csproj", "src/GitHub/"]
+COPY ["apps/ServiceDefaults/ServiceDefaults.csproj", "apps/ServiceDefaults/"]
+RUN dotnet restore "./apps/App/App.csproj"
 COPY . .
-WORKDIR "/src/App"
+WORKDIR "/src/apps/App"
 RUN dotnet build "./App.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
@@ -27,4 +31,5 @@ RUN dotnet publish "./App.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:Use
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "App.dll"]
+USER app
+ENTRYPOINT ["dotnet", "RepoStats.AppHost.dll"]

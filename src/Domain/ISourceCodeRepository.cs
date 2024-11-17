@@ -2,7 +2,7 @@
 
 public interface ISourceCodeRepository : IDisposable
 {
-    Task<IReadOnlyList<RepositoryResource>> Search(CancellationToken token);
+    Task<IReadOnlyList<RepositoryResource>> Search(StatisticsContext context, CancellationToken token);
 
-    Task<RepositoryResourceContent> Fetch(RepositoryResource resource, CancellationToken token);
+    Task<RepositoryResourceContent> Fetch(StatisticsContext context, RepositoryResource resource, CancellationToken token);
 }

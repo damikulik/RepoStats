@@ -3,6 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Octokit;
 
+using Polly;
+using Polly.Retry;
+
 using RepoStats.Domain;
 
 namespace RepoStats.GitHubLoader;
@@ -21,6 +24,15 @@ public static class GitHubRepositoryRegistrator
         {
             throw new InvalidOperationException("GitHub configuration must have non-empty Security Key and App Name.");
         }
+
+        services.AddResiliencePipeline(nameof(GitHubRepository), builder
+            => builder
+                .AddRetry(new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    BackoffType = DelayBackoffType.Exponential,
+                })
+                .AddTimeout(TimeSpan.FromSeconds(1)));
 
         services.AddSingleton<IGitHubClient>(new GitHubClient(new ProductHeaderValue(config.AppName))
         {

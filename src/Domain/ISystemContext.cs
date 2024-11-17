@@ -5,7 +5,7 @@ namespace RepoStats.Domain;
 
 public interface ISystemContext
 {
-    Decoder Decoder { get; }
+    Encoding Encoding { get; }
 
     CultureInfo Culture { get; }
 

@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 using ErrorOr;
 
@@ -9,10 +8,15 @@ using RepoStats.Domain;
 
 namespace RepoStats.Application;
 
-internal class ApplicationService(RepoStatsConfig config, ISystemContext systemContext, Func<ISourceCodeRepository> repositoryCreator, ILogger<ApplicationService> logger)
+internal class ApplicationService(
+    RepoStatsConfig config,
+    StatisticsContext statisticsSettings,
+    ISystemContext systemContext,
+    Func<ISourceCodeRepository> repositoryCreator,
+    ILogger<ApplicationService> logger)
     : IRepoStatisticsService, IStatisticsUpdater
 {
-    private readonly LetterOccurencesStatisticsCalculator _calculator = new();
+    private readonly CharacterOccurencesStatisticsCalculator _calculator = new(statisticsSettings);
 
     public async Task Process(CancellationToken stoppingToken)
     {
@@ -39,7 +43,7 @@ internal class ApplicationService(RepoStatsConfig config, ISystemContext systemC
 
     public async Task<ErrorOr<CharacterOccurencesView>> GetLetterOccurences(CancellationToken token)
     {
-        LetterOccurencesStatistics? statistics = await _calculator.GetCurrentStatistics();
+        CharacterOccurencesStatistics? statistics = await _calculator.GetCurrentStatistics();
 
         if (statistics is null)
         {

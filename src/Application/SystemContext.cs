@@ -7,7 +7,7 @@ namespace RepoStats.Application;
 
 internal class SystemContext(RepoStatsConfig config) : ISystemContext
 {
-    public Decoder Decoder { get; } = Encoding.GetEncoding(config.Encoding).GetDecoder();
+    public Encoding Encoding { get; } = Encoding.GetEncoding(config.Encoding);
 
     public TimeProvider TimeProvider => TimeProvider.System;
 

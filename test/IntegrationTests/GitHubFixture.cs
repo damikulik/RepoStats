@@ -1,24 +1,48 @@
 ﻿using Microsoft.Extensions.Configuration;
 
+using Moq;
+
 using Octokit;
 
-namespace IntegrationTests
+using Polly;
+using Polly.Registry;
+using Polly.Retry;
+
+using RepoStats.Domain;
+
+namespace RepoStats.GitHubLoader.IntegrationTests;
+
+public class GitHubFixture
 {
-    public class GitHubFixture
+    internal IGitHubClient Client { get; }
+
+    internal StatisticsContext Statistics { get; } = new("lodash", "lodash", ["javascript"]);
+
+    internal ResiliencePipelineProvider<string> ResilienceMechanism { get; }
+
+    public GitHubFixture()
     {
-        internal IGitHubClient Client { get; }
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddEnvironmentVariables()
+            .AddUserSecrets<GitHubFixture>()
+            .Build();
 
-        public GitHubFixture()
+        var resilienceMock = new Mock<ResiliencePipelineProvider<string>>();
+        resilienceMock
+            .Setup(p => p.GetPipeline(It.IsAny<string>()))
+            .Returns(new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions
+                {
+                    OnRetry = arg => ValueTask.CompletedTask,
+                })
+                .AddTimeout(TimeSpan.FromSeconds(1))
+                .Build());
+
+        ResilienceMechanism = resilienceMock.Object;
+
+        Client = new GitHubClient(new ProductHeaderValue("RepoStats"))
         {
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .AddUserSecrets<GitHubFixture>()
-                .Build();
-
-            Client = new GitHubClient(new ProductHeaderValue("RepoStats"))
-            {
-                Credentials = new Credentials(configuration.GetValue<string>("SecurityKey") ?? throw new InvalidOperationException()),
-            };
-        }
+            Credentials = new Credentials(configuration.GetValue<string>("SecurityKey") ?? throw new InvalidOperationException()),
+        };
     }
 }

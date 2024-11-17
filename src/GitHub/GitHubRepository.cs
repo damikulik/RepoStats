@@ -1,37 +1,65 @@
-﻿using Octokit;
+﻿using System.Collections.Concurrent;
+
+using Octokit;
+
+using Polly.Registry;
 
 using RepoStats.Domain;
 
 namespace RepoStats.GitHubLoader;
 
-internal class GitHubRepository(IGitHubClient client, IDisposable lifetimeReference) : ISourceCodeRepository
+internal class GitHubRepository(IGitHubClient client, ResiliencePipelineProvider<string> pipelineProvider, IDisposable lifetimeReference) : ISourceCodeRepository
 {
     private bool _disposedValue;
 
-    public async Task<IReadOnlyList<RepositoryResource>> Search(CancellationToken token)
+    public async Task<IReadOnlyList<RepositoryResource>> Search(StatisticsContext context, CancellationToken token)
     {
-        var request = new SearchCodeRequest()
+        var results = new ConcurrentBag<SearchCodeResult>();
+
+        await Parallel.ForEachAsync(context.Languages, async (configLanguage, token) =>
         {
-            In = [CodeInQualifier.Path],
-            Language = Language.JavaScript,
-        };
+            if (!Enum.TryParse(configLanguage, true, out Language searchLanguage))
+            {
+                return;
+            }
 
-        request.Repos.Add("lodash", "lodash");
+            bool more = true;
+            int page = 1;
+            int size = 50;
 
-        SearchCodeResult contentsJs = await client.Search.SearchCode(request);
+            var pipeline = pipelineProvider.GetPipeline(nameof(GitHubRepository));
 
-        request.Language = Language.TypeScript;
-        SearchCodeResult contentsTs = await client.Search.SearchCode(request);
+            while (more)
+            {
+                var request = new SearchCodeRequest()
+                {
+                    Page = page,
+                    PerPage = size,
+                    Language = searchLanguage,
+                    In = [CodeInQualifier.Path],
+                };
 
-        return contentsJs.Items
-            .Concat(contentsTs.Items)
-            .Select(c => new RepositoryResource(c.Name, c.Path, c.Sha))
+                request.Repos.Add(context.Owner, context.Repository);
+
+                SearchCodeResult matches =
+                    await pipeline.ExecuteAsync(async _ => await client.Search.SearchCode(request), token);
+
+                results.Add(matches);
+                more = matches.TotalCount > (page * size);
+            }
+        });
+
+        return results.SelectMany(p => p.Items)
+            .DistinctBy(p => p.Url)
+            .Select(s => new RepositoryResource(s.Name, s.Path, s.Sha))
             .ToList();
     }
 
-    public async Task<RepositoryResourceContent> Fetch(RepositoryResource resource, CancellationToken token)
+    public async Task<RepositoryResourceContent> Fetch(StatisticsContext context, RepositoryResource resource, CancellationToken token)
     {
-        var content = await client.Repository.Content.GetRawContent("lodash", "lodash", resource.Path);
+        var pipeline = pipelineProvider.GetPipeline(nameof(GitHubRepository));
+        var content = await pipeline
+            .ExecuteAsync(async _ => await client.Repository.Content.GetRawContent(context.Owner, context.Repository, resource.Path), token);
 
         return new(resource.Reference, content);
     }

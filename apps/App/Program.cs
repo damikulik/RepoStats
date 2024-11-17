@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.RateLimiting;
+
 using RepoStats.AppHost.Module;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +10,16 @@ builder.AddServiceDefaults();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddRateLimiter(opts =>
+{
+    opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    opts.AddConcurrencyLimiter("basic", o => o.PermitLimit = 50)
+        .AddFixedWindowLimiter("fixed", o =>
+        {
+            o.PermitLimit = 100;
+            o.Window = TimeSpan.FromSeconds(60);
+        });
+});
 
 builder.Services.AddRepoStats(builder.Configuration);
 
@@ -23,6 +35,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRateLimiter();
 
 app.MapRepoStatsEndpoints().WithOpenApi();
 

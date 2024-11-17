@@ -5,7 +5,9 @@ namespace RepoStats.AppHost.Module;
 public static class EndpointRouteBuilderExtensions
 {
     public static IEndpointConventionBuilder MapRepoStatsEndpoints(this IEndpointRouteBuilder app)
-        => app.MapGet("letter-occurences", async (IRepoStatisticsService service, HttpContext http, CancellationToken token)
+        => app.MapGet(
+            "letter-occurences",
+            async (IRepoStatisticsService service, HttpContext http, CancellationToken token)
             =>
             {
                 var result = await service.GetLetterOccurences(token);
@@ -24,6 +26,8 @@ public static class EndpointRouteBuilderExtensions
 
                 return Results.Ok(result.Value);
             })
-            .WithTags("stats")
-            .WithName("GetLetterOccurences");
+        .WithTags("stats")
+        .WithName("GetLetterOccurences")
+        .RequireRateLimiting("fixed")
+        .RequireRateLimiting("basic");
 }

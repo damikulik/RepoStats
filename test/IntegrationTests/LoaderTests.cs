@@ -1,14 +1,12 @@
 ﻿using System.Text;
 
 using RepoStats.Domain;
-using RepoStats.GitHubLoader;
 
 using Shouldly;
 
-using Xunit;
 using Xunit.Abstractions;
 
-namespace IntegrationTests;
+namespace RepoStats.GitHubLoader.IntegrationTests;
 
 public class LoaderTests(GitHubFixture fixture, ITestOutputHelper helper) : IClassFixture<GitHubFixture>, IDisposable
 {
@@ -17,8 +15,8 @@ public class LoaderTests(GitHubFixture fixture, ITestOutputHelper helper) : ICla
     [Fact]
     public async Task CanSearchRepoFiles()
     {
-        GitHubRepository repository = new(fixture.Client, this);
-        IReadOnlyList<RepositoryResource> files = await repository.Search(CancellationToken.None);
+        GitHubRepository repository = new(fixture.Client, fixture.ResilienceMechanism, this);
+        IReadOnlyList<RepositoryResource> files = await repository.Search(fixture.Statistics, CancellationToken.None);
 
         files.ShouldNotBeNull();
         files.ShouldNotBeEmpty();
@@ -27,13 +25,13 @@ public class LoaderTests(GitHubFixture fixture, ITestOutputHelper helper) : ICla
     [Fact]
     public async Task CanGetRepoContent()
     {
-        GitHubRepository repository = new(fixture.Client, this);
-        IReadOnlyList<RepositoryResource> files = await repository.Search(CancellationToken.None);
+        GitHubRepository repository = new(fixture.Client, fixture.ResilienceMechanism, this);
+        IReadOnlyList<RepositoryResource> files = await repository.Search(fixture.Statistics, CancellationToken.None);
         files.ShouldNotBeNull();
         files.ShouldNotBeEmpty();
 
         var file = files[0];
-        RepositoryResourceContent content = await repository.Fetch(file, CancellationToken.None);
+        RepositoryResourceContent content = await repository.Fetch(fixture.Statistics, file, CancellationToken.None);
 
         content.ShouldNotBeNull();
         content.Reference.ShouldBe(file.Reference);
