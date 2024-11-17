@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Text;
 
 using RepoStats.Domain;
 
@@ -31,13 +32,11 @@ public class LoaderTests(GitHubFixture fixture, ITestOutputHelper helper) : ICla
         files.ShouldNotBeEmpty();
 
         var file = files[0];
-        RepositoryResourceContent content = await repository.Fetch(fixture.Statistics, file, CancellationToken.None);
+        var content = await repository.Fetch(fixture.Statistics, file, CancellationToken.None);
 
-        content.ShouldNotBeNull();
-        content.Reference.ShouldBe(file.Reference);
-        content.Content.Length.ShouldBePositive();
+        content.Length.ShouldBePositive();
 
-        helper.WriteLine($"Read {Encoding.UTF8.GetString(content.Content.Span)}");
+        helper.WriteLine($"Read {Encoding.UTF8.GetString(content.ToArray())}");
 
         helper.WriteLine($"Found {files.Count}");
     }

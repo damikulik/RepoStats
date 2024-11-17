@@ -1,4 +1,5 @@
-﻿using System.Collections.Frozen;
+﻿using System.Buffers;
+using System.Collections.Frozen;
 
 using RepoStats.Domain;
 
@@ -28,9 +29,9 @@ internal sealed class MapReduceCalculator(StatisticsContext sourceCodeContext)
 
         foreach (RepositoryResource resource in searchResult)
         {
-            var file = await repository.Fetch(sourceCodeContext, resource, token);
+            var content = await repository.Fetch(sourceCodeContext, resource, token);
 
-            var map = context.Encoding.GetString(file.Content.Span)
+            var map = context.Encoding.GetString(content.ToArray())
                 .GroupBy(p => p)
                 .Where(p => char.IsLetter(p.Key) || char.IsDigit(p.Key))
                 .ToDictionary(p => p.Key, p => p.Count());

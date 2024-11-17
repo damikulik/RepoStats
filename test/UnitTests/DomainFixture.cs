@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Buffers;
+using System.Globalization;
 using System.Text;
 
 using Bogus.DataSets;
@@ -23,7 +24,7 @@ public class DomainFixture
     {
         var systemMock = new Mock<ISystemContext>();
         systemMock.SetupGet(p => p.Culture).Returns(CultureInfo.InvariantCulture);
-        systemMock.SetupGet(p => p.Decoder).Returns(Encoding.UTF8.GetDecoder());
+        systemMock.SetupGet(p => p.Encoding).Returns(Encoding.UTF8);
         systemMock.SetupGet(p => p.TimeProvider).Returns(new FakeTimeProvider());
 
         Context = systemMock.Object;
@@ -32,7 +33,7 @@ public class DomainFixture
 
         var repoMock = new Mock<ISourceCodeRepository>();
         repoMock.Setup(p => p.Fetch(It.IsAny<StatisticsContext>(), It.IsAny<RepositoryResource>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new RepositoryResourceContent("test", content));
+            .ReturnsAsync(new ReadOnlySequence<byte>(content));
         repoMock.Setup(p => p.Search(It.IsAny<StatisticsContext>(), CancellationToken.None))
             .ReturnsAsync([new RepositoryResource("test", "test", "test")]);
 

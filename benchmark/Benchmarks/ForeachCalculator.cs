@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Text;
 
@@ -32,12 +33,11 @@ internal sealed class ForeachCalculator(StatisticsContext sourceCodeContext)
 
         foreach (RepositoryResource resource in searchResult)
         {
-            var file = await repository.Fetch(sourceCodeContext, resource, token);
-            var sequence = file.Content;
+            var content = await repository.Fetch(sourceCodeContext, resource, token);
 
-            for (int i = 0; i < sequence.Length; i++)
+            for (int i = 0; i < content.Length; i++)
             {
-                int charCount = decoder.GetChars(sequence.Slice(i, 1).ToArray(), 0, 1, charBuffer, 0);
+                int charCount = decoder.GetChars(content.Slice(i, 1).ToArray(), 0, 1, charBuffer, 0);
 
                 if (charCount > 0)
                 {

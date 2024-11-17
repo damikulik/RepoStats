@@ -31,7 +31,7 @@ Solution uses a simple DDD with Clean Architecture-like approach.
 
 ```mermaid
 C4Context
-    title System Context diagram for Internet Banking System
+    title System Context diagram for RepoStats
     Enterprise_Boundary(www, "Internet") {
         Person(user, "API Consumer", "Client consuming API.")
 
@@ -47,6 +47,48 @@ C4Context
     Rel(user, repoStats, "Requests statistics", "Rest API")
     Rel(repoStats, github, "Fetches repository content", "Rest API")
 ```
+
+## Container diagram
+Same as System.
+
+## Component diagram
+```mermaid
+C4Component
+    title Component diagram for RepoStats
+
+    System_Ext(client, "API client", "Consumer of the API.")
+
+    Container_Boundary(repoStasApi, "RepoStats Application (WebHost)") {
+
+        Component(controller, "Application Facade", "Application Service", "Exposes RepoStats functionalities to the Hosting Layer.")
+
+        Component(hostedSvc, "Hosted Service", "Hosted Service", "Provisions Calculator to run as a Background Job.")
+
+        Container_Boundary(applicationLayer, "Application layer") {
+
+            Component(application, "Application Facade", "Application Service", "Exposes RepoStats functionalities to the Hosting Layer.")
+
+            Component(repository, "GitHub API Repository", "Infrastructure Service", "Integrates with GitHib.")
+            
+            Container_Boundary(domainLayer, "Domain") {                
+        
+                Component(calculator, "Statistics Calculator", "Domain Object", "Calculates statistics and returns them if asked.")
+        
+            }
+        }
+    }
+    
+    Rel(client, controller, "Requests Statistics")
+    Rel(controller, application, "Delegates requests for Statistics")
+    Rel(hostedSvc, application, "Starts recurring Statistics Processing")
+    Rel(application, calculator, "Asks for Statistics")
+
+    Rel(calculator, repository, "Uses to get Source Code", "(indirectly, through interface)")
+
+    UpdateRelStyle(calculator, repository, $lineColor = "gray")
+
+```
+
 
 ## Main features
 
@@ -77,18 +119,17 @@ Intel Core i9-10885H CPU 2.40GHz, 1 CPU, 16 logical and 8 physical cores
 
 
 ```
-| Method       | RepositoryFiles | Mean       | Error    | StdDev    | Ratio | RatioSD | Completed Work Items | Lock Contentions | Gen0       | Gen1      | Allocated | Alloc Ratio |
-|------------- |---------------- |-----------:|---------:|----------:|------:|--------:|---------------------:|-----------------:|-----------:|----------:|----------:|------------:|
-| **Current**      | **1**               |   **382.1 ms** |  **7.25 ms** |   **6.79 ms** |  **1.00** |    **0.02** |               **4.0000** |                **-** | **27000.0000** |         **-** | **231.03 MB** |        **1.00** |
-| DirectReduce | 1               |   272.2 ms |  6.16 ms |  17.97 ms |  0.71 |    0.05 |               2.0000 |                - | 27000.0000 |         - | 230.86 MB |        1.00 |
-| MapReduce    | 1               |   193.8 ms |  4.02 ms |  11.54 ms |  0.51 |    0.03 |               2.0000 |                - | 10500.0000 |         - | 127.54 MB |        0.55 |
-| Naive        | 1               |   201.6 ms |  4.44 ms |  12.73 ms |  0.53 |    0.03 |               2.0000 |                - | 10500.0000 |         - | 127.67 MB |        0.55 |
-|              |                 |            |          |           |       |         |                      |                  |            |           |           |             |
-| **Current**      | **100**             |   **389.2 ms** |  **7.55 ms** |  **10.83 ms** |  **1.00** |    **0.04** |             **117.0000** |         **179.0000** | **19000.0000** | **7000.0000** |  **157.6 MB** |        **1.00** |
-| DirectReduce | 100             | 4,839.6 ms | 96.78 ms | 125.84 ms | 12.44 |    0.46 |             101.0000 |                - | 20000.0000 | 2000.0000 | 161.99 MB |        1.03 |
-| MapReduce    | 100             | 4,805.1 ms | 94.52 ms | 144.34 ms | 12.35 |    0.50 |             101.0000 |                - | 11000.0000 | 2000.0000 |  93.83 MB |        0.60 |
-| Naive        | 100             | 4,806.5 ms | 93.81 ms | 118.64 ms | 12.36 |    0.45 |             101.0000 |                - | 10000.0000 | 2000.0000 |  88.79 MB |        0.56 |
-
+| Method       | RepositoryFiles | Mean        | Error     | StdDev     | Ratio | RatioSD | Completed Work Items | Lock Contentions | Gen0      | Gen1      | Gen2     | Allocated | Alloc Ratio |
+|------------- |---------------- |------------:|----------:|-----------:|------:|--------:|---------------------:|-----------------:|----------:|----------:|---------:|----------:|------------:|
+| **Current**      | **1**               |    **92.36 ms** |  **1.844 ms** |   **5.350 ms** |  **1.00** |    **0.08** |               **4.0000** |                **-** | **2666.6667** |         **-** |        **-** |  **23.12 MB** |        **1.00** |
+| DirectReduce | 1               |    79.63 ms |  1.599 ms |   4.689 ms |  0.87 |    0.07 |               2.0000 |                - | 2714.2857 |         - |        - |  23.09 MB |        1.00 |
+| MapReduce    | 1               |    66.73 ms |  1.773 ms |   5.144 ms |  0.72 |    0.07 |               2.0000 |                - | 1428.5714 |  428.5714 | 285.7143 |  13.26 MB |        0.57 |
+| Naive        | 1               |    67.16 ms |  1.679 ms |   4.950 ms |  0.73 |    0.07 |               2.0000 |                - | 1285.7143 |  285.7143 | 142.8571 |  13.25 MB |        0.57 |
+|              |                 |             |           |            |       |         |                      |                  |           |           |          |           |             |
+| **Current**      | **100**             |   **333.37 ms** |  **6.612 ms** |  **12.419 ms** |  **1.00** |    **0.05** |             **118.0000** |          **21.0000** | **3000.0000** |         **-** |        **-** |  **27.68 MB** |        **1.00** |
+| DirectReduce | 100             | 4,722.80 ms | 93.819 ms | 137.518 ms | 14.19 |    0.66 |             101.0000 |                - | 3000.0000 |         - |        - |  28.33 MB |        1.02 |
+| MapReduce    | 100             | 4,734.67 ms | 92.943 ms |  99.448 ms | 14.22 |    0.60 |             101.0000 |                - | 2000.0000 |         - |        - |   17.6 MB |        0.64 |
+| Naive        | 100             | 4,699.95 ms | 92.016 ms | 131.967 ms | 14.12 |    0.65 |             101.0000 |                - | 2000.0000 | 1000.0000 |        - |  17.59 MB |        0.64 |
 # Future work
 
 1. Per file stats calculation could be added to avoid recalculating Stats for files which did not change.

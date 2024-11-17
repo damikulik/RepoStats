@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Buffers;
+using System.Text;
 
 using Bogus.DataSets;
 
@@ -20,10 +21,10 @@ internal class BenchmarkRepository(IDictionary<string, int> repoInfo) : ISourceC
             .ToList();
     }
 
-    public async Task<RepositoryResourceContent> Fetch(StatisticsContext context, RepositoryResource resource, CancellationToken token)
+    public async Task<ReadOnlySequence<byte>> Fetch(StatisticsContext context, RepositoryResource resource, CancellationToken token)
     {
         await Task.Delay(Random.Shared.Next(20, 60), token);
-        return new RepositoryResourceContent(resource.Reference, Encoding.UTF8.GetBytes(_lorem.Lines(lineCount: repoInfo[resource.Path])));
+        return new ReadOnlySequence<byte>(Encoding.UTF8.GetBytes(_lorem.Lines(lineCount: repoInfo[resource.Path])));
     }
 
     public void Dispose()

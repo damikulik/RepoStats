@@ -1,4 +1,5 @@
-﻿using System.Collections.Frozen;
+﻿using System.Buffers;
+using System.Collections.Frozen;
 
 using RepoStats.Domain;
 
@@ -27,8 +28,8 @@ internal sealed class NaiveCalculator(StatisticsContext sourceCodeContext)
         List<string> contents = new List<string>();
         foreach (var item in searchResult)
         {
-            var file = await repository.Fetch(sourceCodeContext, item, token);
-            contents.Add(context.Encoding.GetString(file.Content.Span));
+            var content = await repository.Fetch(sourceCodeContext, item, token);
+            contents.Add(context.Encoding.GetString(content.ToArray()));
         }
 
         List<Dictionary<char, int>> maps = [];

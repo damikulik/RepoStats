@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
 
 using Octokit;
 
@@ -55,13 +56,13 @@ internal class GitHubRepository(IGitHubClient client, ResiliencePipelineProvider
             .ToList();
     }
 
-    public async Task<RepositoryResourceContent> Fetch(StatisticsContext context, RepositoryResource resource, CancellationToken token)
+    public async Task<ReadOnlySequence<byte>> Fetch(StatisticsContext context, RepositoryResource resource, CancellationToken token)
     {
         var pipeline = pipelineProvider.GetPipeline(nameof(GitHubRepository));
         var content = await pipeline
             .ExecuteAsync(async _ => await client.Repository.Content.GetRawContent(context.Owner, context.Repository, resource.Path), token);
 
-        return new(resource.Reference, content);
+        return new ReadOnlySequence<byte>(content);
     }
 
     public void Dispose()

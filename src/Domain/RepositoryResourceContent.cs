@@ -1,5 +1,5 @@
-﻿using System;
+﻿using System.Buffers;
 
 namespace RepoStats.Domain;
 
-public record RepositoryResourceContent(string Reference, ReadOnlyMemory<byte> Content);
+public record RepositoryResourceContent(string Reference, ReadOnlySequence<byte> Content);
