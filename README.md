@@ -27,11 +27,6 @@ There is an `GitHub API` secret which must be set.
 # Architecture
 Solution uses a simple DDD with Clean Architecture-like approach.
 
-## Main features
-
-* Calculator is used by Hosted Service which runs periodically.
-* API returns 503 if there is no Statistics calculated yet.
-
 ## System Context
 
 ```mermaid
@@ -52,6 +47,11 @@ C4Context
     Rel(user, repoStats, "Requests statistics", "Rest API")
     Rel(repoStats, github, "Fetches repository content", "Rest API")
 ```
+
+## Main features
+
+* Calculator is used by Hosted Service which runs periodically.
+* API returns 503 if there is no Statistics calculated yet.
 
 # Statistics Calculator details
 
