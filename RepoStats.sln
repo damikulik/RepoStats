@@ -43,7 +43,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "test\UnitTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepoStats.Benchmarks", "benchmark\Benchmarks\RepoStats.Benchmarks.csproj", "{72206675-4DDD-4B8A-97CE-E65098033311}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benhcmarks", "benhcmarks", "{13DC461F-ABC2-4EBD-B483-D017CE5F5D07}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{13DC461F-ABC2-4EBD-B483-D017CE5F5D07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

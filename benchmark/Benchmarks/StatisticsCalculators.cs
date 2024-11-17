@@ -34,17 +34,17 @@ public class StatisticsCalculators
     {
         var repository = new BenchmarkRepository(_textInfos);
         var context = new SystemContext(new RepoStatsConfig(1, "utf-8", CultureInfo.GetCultureInfo("en")));
-        CharacterOccurencesStatisticsCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", ["b"]));
+        CharacterOccurencesStatisticsCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", new HashSet<string> { "b" }));
 
         await calculator.CalculateLetterStats(repository, context, CancellationToken.None);
     }
 
     [Benchmark]
-    public async Task DirectReduce()
+    public async Task Direct()
     {
         var repository = new BenchmarkRepository(_textInfos);
         var context = new SystemContext(new RepoStatsConfig(1, "utf-8", CultureInfo.GetCultureInfo("en")));
-        ForeachCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", ["b"]));
+        DirectCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", new HashSet<string> { "b" }));
 
         await calculator.CalculateLetterStats(repository, context, CancellationToken.None);
     }
@@ -54,7 +54,7 @@ public class StatisticsCalculators
     {
         var repository = new BenchmarkRepository(_textInfos);
         var context = new SystemContext(new RepoStatsConfig(1, "utf-8", CultureInfo.GetCultureInfo("en")));
-        MapReduceCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", ["b"]));
+        MapReduceCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", new HashSet<string> { "b" }));
 
         await calculator.CalculateLetterStats(repository, context, CancellationToken.None);
     }
@@ -64,7 +64,7 @@ public class StatisticsCalculators
     {
         var repository = new BenchmarkRepository(_textInfos);
         var context = new SystemContext(new RepoStatsConfig(1, "utf-8", CultureInfo.GetCultureInfo("en")));
-        NaiveCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", ["b"]));
+        NaiveCalculator calculator = new(new StatisticsContext("benchmark", "benchmark", new HashSet<string> { "b" }));
 
         await calculator.CalculateLetterStats(repository, context, CancellationToken.None);
     }

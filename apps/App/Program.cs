@@ -22,6 +22,7 @@ builder.Services.AddRateLimiter(opts =>
 });
 
 builder.Services.AddRepoStats(builder.Configuration);
+builder.AddSeqEndpoint("seq");
 
 var app = builder.Build();
 

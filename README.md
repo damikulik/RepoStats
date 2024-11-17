@@ -1,4 +1,4 @@
-    Example appilcation with basic GitHub integration
+    Example application for basic GitHub integration
 
 
 # Project status
@@ -60,7 +60,7 @@ C4Component
 
     Container_Boundary(repoStasApi, "RepoStats Application (WebHost)") {
 
-        Component(controller, "Application Facade", "Application Service", "Exposes RepoStats functionalities to the Hosting Layer.")
+        Component(controller, "Stats Controller", "API", "Delegates external request to the Application.")
 
         Component(hostedSvc, "Hosted Service", "Hosted Service", "Provisions Calculator to run as a Background Job.")
 

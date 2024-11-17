@@ -1,5 +1,4 @@
 ﻿using System.Buffers;
-using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Text;
 
@@ -7,7 +6,7 @@ using RepoStats.Domain;
 
 namespace RepoStats.Benchmarks;
 
-internal sealed class ForeachCalculator(StatisticsContext sourceCodeContext)
+internal sealed class DirectCalculator(StatisticsContext sourceCodeContext)
 {
     private FrozenDictionary<char, int>? _stats;
     private DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;

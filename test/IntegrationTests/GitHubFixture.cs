@@ -16,7 +16,7 @@ public class GitHubFixture
 {
     internal IGitHubClient Client { get; }
 
-    internal StatisticsContext Statistics { get; } = new("lodash", "lodash", ["javascript"]);
+    internal StatisticsContext Statistics { get; } = new("lodash", "lodash", new HashSet<string> { "javascript" });
 
     internal ResiliencePipelineProvider<string> ResilienceMechanism { get; }
 

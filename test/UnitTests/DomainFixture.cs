@@ -18,7 +18,9 @@ public class DomainFixture
 
     public ISourceCodeRepository Repository { get; internal set; }
 
-    public StatisticsContext StatsContext { get; } = new("test", "test", ["test"]);
+    public ISourceCodeRepository SmallRepository { get; internal set; }
+
+    public StatisticsContext StatsContext { get; } = new("test", "test", new HashSet<string> { "test" });
 
     public DomainFixture()
     {
@@ -38,5 +40,13 @@ public class DomainFixture
             .ReturnsAsync([new RepositoryResource("test", "test", "test")]);
 
         Repository = repoMock.Object;
+
+        var smallRepoMock = new Mock<ISourceCodeRepository>();
+        smallRepoMock.Setup(p => p.Fetch(It.IsAny<StatisticsContext>(), It.IsAny<RepositoryResource>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ReadOnlySequence<byte>(Encoding.UTF8.GetBytes("aabbbcccc")));
+        smallRepoMock.Setup(p => p.Search(It.IsAny<StatisticsContext>(), CancellationToken.None))
+            .ReturnsAsync([new RepositoryResource("test", "test", "test"), new RepositoryResource("test", "test", "test"), new RepositoryResource("test", "test", "test")]);
+
+        SmallRepository = smallRepoMock.Object;
     }
 }

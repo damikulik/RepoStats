@@ -1,13 +1,8 @@
-using System.Net.Sockets;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.App>("app");
+var seq = builder.AddSeq("seq")
+                 .ExcludeFromManifest();
 
-builder
-    .AddResource(new ContainerResource("seq"))
-    .WithAnnotation(new EndpointAnnotation(ProtocolType.Tcp, uriScheme: "http", name: "seq", port: 5341, targetPort: 80))
-    .WithEnvironment("ACCEPT_EULA", "Y")
-    .WithAnnotation(new ContainerImageAnnotation { Image = "datalust/seq", Tag = "latest" });
+builder.AddProject<Projects.App>("app").WithReference(seq);
 
 await builder.Build().RunAsync();

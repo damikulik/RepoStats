@@ -15,7 +15,7 @@ public static class ApplicationRegistrator
         var config = configuration.GetSection(sectionPath).Get<RepoStatsConfig>()
             ?? throw new InvalidOperationException("Can't bind the configuration for RepoStats application.");
 
-        var context = configuration.GetSection($"{sectionPath}:Statistics:LetterOccurences").Get<StatisticsContext>()
+        var context = configuration.GetSection($"RepoStats:Statistics:CharacterOccurences").Get<StatisticsContext>()
             ?? throw new InvalidOperationException("Can't bind the Statistics Context.");
 
         services.AddSingleton(config);
