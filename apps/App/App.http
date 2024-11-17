@@ -1,4 +1,4 @@
-@App_HostAddress = https://localhost:7140
+@App_HostAddress = https://localhost:5122
 
 GET {{App_HostAddress}}/letter-occurences/
 Accept: application/json

@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
 
 using RepoStats.AppHost.Module;
+
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +24,10 @@ builder.Services.AddRateLimiter(opts =>
         });
 });
 
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
+
 builder.Services.AddRepoStats(builder.Configuration);
-builder.AddSeqEndpoint("seq");
 
 var app = builder.Build();
 
