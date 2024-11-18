@@ -38,16 +38,7 @@ public sealed class CharacterOccurencesStatisticsCalculator(StatisticsContext so
 
             for (int i = 0; i < content.Length; i++)
             {
-                int charCount = 0;
-                try
-                {
-                    charCount = decoder.GetChars(content.Slice(i, 1).ToArray(), 0, 1, charBuffer, 0);
-                }
-                catch (ArgumentException ex)
-                {
-                    _ = ex;
-                }
-
+                int charCount = decoder.GetChars(content.Slice(i, 1).ToArray(), 0, 1, charBuffer, 0);
                 if (charCount > 0)
                 {
                     var candidate = charBuffer[0];
